@@ -1,0 +1,191 @@
+---
+/**
+ * Base layout: document shell, metadata, and the site's only two scripts.
+ *
+ * Both scripts are inline and unminified-by-design small. They total a few
+ * hundred bytes and are the entire client-side JavaScript budget for a page
+ * that doesn't need anything more.
+ */
+import "../styles/global.css";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import { SITE } from "../data/site";
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Set on case-study pages so the document title leads with the project. */
+  ogType?: "website" | "article";
+  /** Hides the footer's contact block on pages that already handle contact. */
+  showFooter?: boolean;
+}
+
+const {
+  title,
+  description = SITE.description,
+  ogType = "website",
+  showFooter = true,
+} = Astro.props;
+
+const pageTitle = title ? `${title} — ${SITE.name}` : `${SITE.name} — ${SITE.headline}`;
+const canonical = new URL(Astro.url.pathname, SITE.url).href;
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Theme colour for mobile browser chrome. -->
+    <meta name="theme-color" content="#0b0d0f" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Social previews -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+
+    <link rel="sitemap" href="/sitemap.xml" />
+  </head>
+
+  <body class="min-h-dvh antialiased">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-[var(--color-accent)] focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-[#04140d]"
+    >
+      Skip to content
+    </a>
+
+    <Nav />
+
+    <main id="main" class="pt-16">
+      <slot />
+    </main>
+
+    {showFooter && <Footer />}
+
+    {/* ---------------------------------------------------------------
+        Scroll reveal.
+        Adds data-reveal to eligible elements and flips them to "in" as
+        they enter the viewport. Skipped entirely when the user prefers
+        reduced motion, and marked so CSS can show everything immediately
+        if this script never runs.
+        --------------------------------------------------------------- */}
+    <script>
+      const prefersReduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+
+      if (!prefersReduced && "IntersectionObserver" in window) {
+        const targets = document.querySelectorAll<HTMLElement>("[data-reveal]");
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.setAttribute("data-reveal", "in");
+              observer.unobserve(entry.target);
+            }
+          },
+          // Fire slightly before the element is fully on screen.
+          { rootMargin: "0px 0px -8% 0px", threshold: 0.05 },
+        );
+
+        for (const target of targets) observer.observe(target);
+      } else {
+        for (const target of document.querySelectorAll("[data-reveal]")) {
+          target.setAttribute("data-reveal", "in");
+        }
+      }
+    </script>
+
+    {/* ---------------------------------------------------------------
+        Navigation: mobile menu toggle, close-on-navigate, and active
+        section highlighting via IntersectionObserver.
+        --------------------------------------------------------------- */}
+    <script>
+      const toggle = document.getElementById("nav-toggle");
+      const menu = document.getElementById("nav-menu");
+
+      if (toggle && menu) {
+        const setOpen = (open: boolean) => {
+          menu.hidden = !open;
+          toggle.setAttribute("aria-expanded", String(open));
+          toggle.setAttribute(
+            "aria-label",
+            open ? "Close navigation menu" : "Open navigation menu",
+          );
+        };
+
+        toggle.addEventListener("click", () => setOpen(menu.hidden));
+
+        for (const link of menu.querySelectorAll("[data-nav-mobile-link]")) {
+          link.addEventListener("click", () => setOpen(false));
+        }
+
+        // Close on Escape, and if the viewport grows past the mobile breakpoint.
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape" && !menu.hidden) {
+            setOpen(false);
+            toggle.focus();
+          }
+        });
+
+        const desktop = window.matchMedia("(min-width: 768px)");
+        desktop.addEventListener("change", (event) => {
+          if (event.matches) setOpen(false);
+        });
+      }
+
+      // Active-section highlighting. Only runs on the home page, where the
+      // nav links point at sections rather than at other pages.
+      const navLinks = document.querySelectorAll<HTMLElement>("[data-nav-link]");
+
+      if (navLinks.length && "IntersectionObserver" in window) {
+        const sections = Array.from(navLinks)
+          .map((link) => {
+            const id = link.dataset.navLink;
+            return id ? document.getElementById(id) : null;
+          })
+          .filter((section): section is HTMLElement => section !== null);
+
+        const visible = new Set<string>();
+
+        const syncCurrent = () => {
+          for (const link of navLinks) {
+            const isCurrent = visible.has(link.dataset.navLink ?? "");
+            if (isCurrent) link.setAttribute("aria-current", "true");
+            else link.removeAttribute("aria-current");
+          }
+        };
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              const id = entry.target.id;
+              if (entry.isIntersecting) visible.add(id);
+              else visible.delete(id);
+            }
+            syncCurrent();
+          },
+          // A band across the middle of the viewport decides what's "current".
+          { rootMargin: "-45% 0px -45% 0px" },
+        );
+
+        for (const section of sections) observer.observe(section);
+      }
+    </script>
+  </body>
+</html>

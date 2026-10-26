@@ -1,0 +1,325 @@
+---
+/**
+ * Case-study pages, generated from PROJECTS in src/data/site.ts.
+ *
+ * Adding a project to that array creates its page automatically — no new
+ * file required.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import {
+  PROJECTS,
+  getProject,
+  statusLabel,
+  type Project,
+} from "../../data/site";
+
+export function getStaticPaths() {
+  return PROJECTS.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+
+const status = statusLabel[project.status];
+const isShipped = project.status === "shipped";
+
+// Prev/next navigation keeps the work browsable without going back home.
+const index = PROJECTS.findIndex((p) => p.slug === project.slug);
+const previous = index > 0 ? PROJECTS[index - 1] : undefined;
+const next = index < PROJECTS.length - 1 ? PROJECTS[index + 1] : undefined;
+
+const sections = [
+  { id: "context", label: "Context" },
+  { id: "problem", label: "Problem" },
+  { id: "approach", label: "Approach" },
+  { id: "features", label: "Key features" },
+  { id: "challenges", label: "Challenges" },
+  { id: "next", label: "What's next" },
+];
+---
+
+<BaseLayout
+  title={project.name}
+  description={project.summary}
+  ogType="article"
+>
+  <article>
+    <!-- ============================================================
+         Header
+         ============================================================ -->
+    <header class="border-b border-[var(--color-line)]">
+      <div class="container-page py-16 md:py-24">
+        <a
+          href="/#work"
+          class="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.16em] text-[var(--color-ink-subtle)] transition-colors duration-150 hover:text-[var(--color-accent)]"
+        >
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M14 8H3M7 4L3 8l4 4"></path>
+          </svg>
+          All work
+        </a>
+
+        <div class="mt-8 flex flex-wrap items-center gap-x-4 gap-y-3">
+          <span
+            class:list={[
+              "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[0.6875rem] uppercase tracking-wider",
+              isShipped
+                ? "border-[var(--color-accent)]/30 bg-[var(--color-accent-soft)] text-[var(--color-accent)]"
+                : "border-[var(--color-line)] text-[var(--color-ink-subtle)]",
+            ]}
+          >
+            <span
+              class:list={[
+                "size-1.5 rounded-full",
+                isShipped ? "bg-[var(--color-accent)]" : "bg-[var(--color-ink-subtle)]",
+              ]}
+              aria-hidden="true"></span>
+            {status}
+          </span>
+          <span
+            class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-[var(--color-ink-subtle)]"
+            >{project.year}</span
+          >
+        </div>
+
+        <h1
+          class="mt-6 max-w-[24ch] text-4xl font-semibold leading-[1.1] tracking-tight text-balance md:text-5xl"
+        >
+          {project.name}
+        </h1>
+
+        <p
+          class="mt-6 max-w-[62ch] text-lg leading-relaxed text-[var(--color-ink-muted)]"
+        >
+          {project.summary}
+        </p>
+
+        <div class="mt-10 flex flex-wrap items-center gap-3">
+          {
+            project.links.live && (
+              <a
+                href={project.links.live}
+                rel="noopener"
+                class="inline-flex items-center gap-2 rounded-full bg-[var(--color-accent)] px-5 py-3 text-sm font-semibold text-[#04140d] transition-colors duration-150 hover:bg-[#0ea472]"
+              >
+                View live
+                <span aria-hidden="true">↗</span>
+              </a>
+            )
+          }
+          {
+            project.links.code && (
+              <a
+                href={project.links.code}
+                rel="noopener"
+                class="inline-flex items-center gap-2 rounded-full border border-[var(--color-line-strong)] px-5 py-3 text-sm font-medium text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+              >
+                Source code
+                <span aria-hidden="true">↗</span>
+              </a>
+            )
+          }
+          {
+            !project.links.live && !project.links.code && (
+              <p class="font-mono text-xs text-[var(--color-ink-subtle)]">
+                Links to follow once this ships
+              </p>
+            )
+          }
+        </div>
+
+        <ul
+          class="mt-10 flex flex-wrap gap-1.5 border-t border-[var(--color-line)] pt-8"
+        >
+          {
+            project.stack.map((item) => (
+              <li class="rounded border border-[var(--color-line)] px-2.5 py-1.5 font-mono text-xs text-[var(--color-ink-muted)]">
+                {item}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </header>
+
+    <!-- ============================================================
+         Body
+         ============================================================ -->
+    <div
+      class="container-page grid gap-12 py-16 md:py-24 lg:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] lg:gap-20"
+    >
+      <!-- Sticky section index on wide screens. -->
+      <nav
+        aria-label="On this page"
+        class="hidden lg:sticky lg:top-28 lg:block lg:self-start"
+      >
+        <p
+          class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-[var(--color-ink-subtle)]"
+        >
+          On this page
+        </p>
+        <ul class="mt-4 space-y-1 border-l border-[var(--color-line)]">
+          {
+            sections.map((section) => (
+              <li>
+                <a
+                  href={`#${section.id}`}
+                  class="-ml-px block border-l border-transparent py-1.5 pl-4 text-sm text-[var(--color-ink-subtle)] transition-colors duration-150 hover:border-[var(--color-accent)] hover:text-[var(--color-ink)]"
+                >
+                  {section.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="max-w-[68ch] space-y-16">
+        <section id="context" class="scroll-mt-24" data-reveal>
+          <h2 class="text-sm font-semibold tracking-tight">Context</h2>
+          <p class="mt-4 leading-relaxed text-[var(--color-ink-muted)]">
+            {project.context}
+          </p>
+        </section>
+
+        <section id="problem" class="scroll-mt-24" data-reveal>
+          <h2 class="text-sm font-semibold tracking-tight">Problem</h2>
+          <p class="mt-4 leading-relaxed text-[var(--color-ink-muted)]">
+            {project.problem}
+          </p>
+        </section>
+
+        <section id="approach" class="scroll-mt-24" data-reveal>
+          <h2 class="text-sm font-semibold tracking-tight">Approach</h2>
+          <ul class="mt-4 space-y-4">
+            {
+              project.approach.map((item) => (
+                <li class="relative pl-6 leading-relaxed text-[var(--color-ink-muted)]">
+                  <span
+                    class="absolute left-0 top-[0.6em] size-1.5 rounded-full bg-[var(--color-accent)]"
+                    aria-hidden="true"
+                  />
+                  {item}
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        <section id="features" class="scroll-mt-24" data-reveal>
+          <h2 class="text-sm font-semibold tracking-tight">Key features</h2>
+          <dl class="mt-6 grid gap-px overflow-hidden rounded-lg border border-[var(--color-line)] bg-[var(--color-line)] sm:grid-cols-2">
+            {
+              project.features.map((feature) => (
+                <div class="bg-[var(--color-surface)] p-6">
+                  <dt class="text-sm font-semibold text-[var(--color-ink)]">
+                    {feature.title}
+                  </dt>
+                  <dd class="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">
+                    {feature.detail}
+                  </dd>
+                </div>
+              ))
+            }
+          </dl>
+        </section>
+
+        <section id="challenges" class="scroll-mt-24" data-reveal>
+          <h2 class="text-sm font-semibold tracking-tight">
+            Challenges and tradeoffs
+          </h2>
+          <dl class="mt-6 space-y-px overflow-hidden rounded-lg border border-[var(--color-line)] bg-[var(--color-line)]">
+            {
+              project.challenges.map((item) => (
+                <div class="bg-[var(--color-surface)] p-6">
+                  <dt class="text-sm font-semibold text-[var(--color-ink)]">
+                    {item.title}
+                  </dt>
+                  <dd class="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">
+                    {item.detail}
+                  </dd>
+                </div>
+              ))
+            }
+          </dl>
+        </section>
+
+        <section id="next" class="scroll-mt-24" data-reveal>
+          <h2 class="text-sm font-semibold tracking-tight">What's next</h2>
+          <ul class="mt-4 space-y-3">
+            {
+              project.next.map((item) => (
+                <li class="flex gap-3 leading-relaxed text-[var(--color-ink-muted)]">
+                  <span
+                    class="mt-[0.55em] size-1 shrink-0 rounded-full bg-[var(--color-ink-subtle)]"
+                    aria-hidden="true"
+                  />
+                  {item}
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         Prev / next
+         ============================================================ -->
+    <nav
+      aria-label="Other projects"
+      class="border-t border-[var(--color-line)] bg-[var(--color-surface)]"
+    >
+      <div class="container-page grid gap-px sm:grid-cols-2">
+        {
+          previous ? (
+            <a
+              href={`/work/${previous.slug}`}
+              class="group flex flex-col gap-2 py-10 sm:pr-8"
+            >
+              <span class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-[var(--color-ink-subtle)]">
+                Previous
+              </span>
+              <span class="text-lg font-semibold tracking-tight transition-colors duration-150 group-hover:text-[var(--color-accent)]">
+                {previous.name}
+              </span>
+            </a>
+          ) : (
+            <div class="hidden sm:block" />
+          )
+        }
+        {
+          next && (
+            <a
+              href={`/work/${next.slug}`}
+              class="group flex flex-col gap-2 py-10 sm:items-end sm:pl-8 sm:text-right"
+            >
+              <span class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-[var(--color-ink-subtle)]">
+                Next
+              </span>
+              <span class="text-lg font-semibold tracking-tight transition-colors duration-150 group-hover:text-[var(--color-accent)]">
+                {next.name}
+              </span>
+            </a>
+          )
+        }
+      </div>
+    </nav>
+  </article>
+</BaseLayout>

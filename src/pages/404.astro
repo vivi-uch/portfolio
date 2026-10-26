@@ -1,0 +1,50 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { PROJECTS } from "../data/site";
+---
+
+<BaseLayout title="Page not found" showFooter={false}>
+  <section class="container-page flex min-h-[70vh] flex-col justify-center py-24">
+    <p
+      class="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-accent)]"
+    >
+      404
+    </p>
+    <h1
+      class="mt-6 max-w-[22ch] text-3xl font-semibold leading-tight tracking-tight md:text-4xl"
+    >
+      That page isn't here.
+    </h1>
+    <p class="mt-5 max-w-[50ch] leading-relaxed text-[var(--color-ink-muted)]">
+      The link may be out of date, or the address may have a typo. Here's
+      everything that does exist.
+    </p>
+
+    <ul
+      class="mt-10 max-w-[40ch] divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]"
+    >
+      {
+        PROJECTS.map((project) => (
+          <li>
+            <a
+              href={`/work/${project.slug}`}
+              class="flex items-center justify-between gap-4 py-4 text-sm text-[var(--color-ink-muted)] transition-colors duration-150 hover:text-[var(--color-accent)]"
+            >
+              {project.name}
+              <span aria-hidden="true" class="font-mono text-[var(--color-ink-subtle)]">↗</span>
+            </a>
+          </li>
+        ))
+      }
+      <li>
+        <a
+          href="/"
+          class="flex items-center justify-between gap-4 py-4 text-sm font-medium text-[var(--color-ink)] transition-colors duration-150 hover:text-[var(--color-accent)]"
+        >
+          Back to home
+          <span aria-hidden="true" class="font-mono text-[var(--color-ink-subtle)]">↗</span>
+        </a>
+      </li>
+    </ul>
+  </section>
+</BaseLayout>

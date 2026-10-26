@@ -1,0 +1,199 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import {
+  ABOUT,
+  CONTACT,
+  PROJECTS,
+  SITE,
+  TOOLBOX,
+} from "../data/site";
+
+// Featured work first, then anything else still relevant.
+const work = [...PROJECTS].sort(
+  (a, b) => Number(b.featured) - Number(a.featured),
+);
+---
+
+<BaseLayout>
+  <!-- ============================================================
+       Hero
+       ============================================================ -->
+  <section id="top" class="container-page pb-20 pt-20 md:pb-28 md:pt-32">
+    <p
+      data-reveal
+      class="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-ink-subtle)]"
+    >
+      Portfolio
+    </p>
+
+    <h1
+      data-reveal
+      class="mt-6 max-w-[20ch] text-4xl font-semibold leading-[1.08] tracking-tight text-balance sm:text-5xl md:text-6xl"
+    >
+      {SITE.name}
+    </h1>
+
+    <p
+      data-reveal
+      class="mt-5 font-mono text-sm text-[var(--color-accent)] md:text-base"
+    >
+      {SITE.headline}
+    </p>
+
+    <p
+      data-reveal
+      class="mt-8 max-w-[58ch] text-base leading-relaxed text-[var(--color-ink-muted)] md:text-lg"
+    >
+      {ABOUT.intro}
+    </p>
+
+    <div data-reveal class="mt-10 flex flex-wrap items-center gap-3">
+      <a
+        href="#work"
+        class="rounded-full bg-[var(--color-accent)] px-6 py-3.5 text-sm font-semibold text-[#04140d] transition-colors duration-150 hover:bg-[#0ea472]"
+      >
+        View selected work
+      </a>
+      <a
+        href={`mailto:${CONTACT.email}`}
+        class="rounded-full border border-[var(--color-line-strong)] px-6 py-3.5 text-sm font-medium text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+      >
+        Get in touch
+      </a>
+    </div>
+
+    <!-- At-a-glance facts. Uses a definition list so the pairing is
+         available to assistive tech, not just visual proximity. -->
+    <dl
+      data-reveal
+      class="mt-16 grid gap-x-8 gap-y-6 border-t border-[var(--color-line)] pt-8 sm:grid-cols-2 lg:grid-cols-4"
+    >
+      {
+        ABOUT.facts.map((fact) => (
+          <div>
+            <dt class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-[var(--color-ink-subtle)]">
+              {fact.label}
+            </dt>
+            <dd class="mt-2 text-sm text-[var(--color-ink)]">{fact.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <!-- ============================================================
+       About
+       ============================================================ -->
+  <section
+    id="about"
+    class="scroll-mt-24 border-t border-[var(--color-line)] bg-[var(--color-surface)]"
+  >
+    <div class="container-page py-20 md:py-28">
+      <div class="grid gap-12 md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] md:gap-16">
+        <div data-reveal>
+          <h2
+            class="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-ink-subtle)]"
+          >
+            <span class="text-[var(--color-accent)]" aria-hidden="true">01 — </span
+            >About
+          </h2>
+        </div>
+
+        <div data-reveal class="max-w-[68ch] space-y-6">
+          {
+            ABOUT.body.map((paragraph, index) => (
+              <p
+                class:list={[
+                  "leading-relaxed",
+                  index === 0
+                    ? "text-lg text-[var(--color-ink)] md:text-xl"
+                    : "text-[var(--color-ink-muted)]",
+                ]}
+              >
+                {paragraph}
+              </p>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       Selected work
+       ============================================================ -->
+  <section id="work" class="scroll-mt-24 border-t border-[var(--color-line)]">
+    <div class="container-page py-20 md:py-28">
+      <div
+        data-reveal
+        class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between"
+      >
+        <div>
+          <h2
+            class="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-ink-subtle)]"
+          >
+            <span class="text-[var(--color-accent)]" aria-hidden="true">02 — </span
+            >Work
+          </h2>
+          <p
+            class="mt-5 max-w-[46ch] text-2xl font-semibold leading-tight tracking-tight text-balance md:text-3xl"
+          >
+            Four projects that show how I build plus one currently on the
+            bench.
+          </p>
+        </div>
+        <p class="max-w-[38ch] text-sm leading-relaxed text-[var(--color-ink-muted)]">
+          Each one has a write-up covering the problem, the decisions I made,
+          and what I'd change next.
+        </p>
+      </div>
+
+      <div class="mt-12 grid gap-4 md:grid-cols-2">
+        {work.map((project) => <ProjectCard project={project} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       Toolbox
+       ============================================================ -->
+  <section
+    id="toolbox"
+    class="scroll-mt-24 border-t border-[var(--color-line)] bg-[var(--color-surface)]"
+  >
+    <div class="container-page py-20 md:py-28">
+      <div class="grid gap-12 md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] md:gap-16">
+        <div data-reveal>
+          <h2
+            class="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-ink-subtle)]"
+          >
+            <span class="text-[var(--color-accent)]" aria-hidden="true">03 — </span
+            >Toolbox
+          </h2>
+        </div>
+
+        <div class="grid gap-10 sm:grid-cols-2">
+          {
+            TOOLBOX.map((group) => (
+              <div data-reveal>
+                <h3 class="text-sm font-semibold tracking-tight text-[var(--color-ink)]">
+                  {group.group}
+                </h3>
+                <ul class="mt-4 flex flex-wrap gap-1.5">
+                  {group.items.map((item) => (
+                    <li class="rounded border border-[var(--color-line)] bg-[var(--color-canvas)] px-2.5 py-1.5 font-mono text-xs text-[var(--color-ink-muted)]">
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact is rendered by the footer, which carries id="contact". -->
+</BaseLayout>
