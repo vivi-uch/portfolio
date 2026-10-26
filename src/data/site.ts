@@ -40,7 +40,7 @@ export const ABOUT = {
   body: [
     "I'm a frontend focused software engineer who enjoys building fast, reliable, and intuitive web applications. My primary tools are React, TypeScript, Next.js, and Vite, and I care deeply about creating seamless user experiences, from responsive interfaces to thoughtful error handling, loading states, and accessibility",
     "While frontend development is my specialty, I'm comfortable working across the stack when needed. I've built applications using Supabase, integrated backend services with Flask, containerized projects with Docker, and maintained quality through automated testing with Vitest. I work with Git and Bitbucket daily and leverage AI tools to speed up development, improve code quality, and uncover edge cases early.",
-    "I'm also actively exploring AI-driven development, combining traditional software engineering practices with modern tools to build smarter and more efficient solutions."
+    "I'm also actively exploring AI-driven development, combining traditional software engineering practices with modern tools to build smarter and more efficient solutions.",
   ],
   facts: [
     { label: "Focus", value: "React · TypeScript · Next.js" },
@@ -68,6 +68,7 @@ export const TOOLBOX = [
       "TanStack Query",
       "Formik + Yup",
       "Zod",
+      "Astro",
     ],
   },
   {
@@ -93,12 +94,7 @@ export const TOOLBOX = [
   },
   {
     group: "Beyond the frontend",
-    items: [
-      "Python",
-      "Flask",
-      "scikit-learn",
-      "AI-assisted development",
-    ],
+    items: ["Python", "Flask", "scikit-learn", "AI-assisted development"],
   },
 ] as const;
 
